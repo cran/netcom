@@ -1,10 +1,10 @@
-0efcd90f2c388d63a391b8bd6444933d *DESCRIPTION
+58538cd0cc77d9dbd358acb55fb60e64 *DESCRIPTION
 0bd6f41a05ac8ab4f1be142a97fee7ff *NAMESPACE
-5c8e04ad57fcd7c1ee4b317bbfd3de1f *R/align.R
+647affdc2536446cd253a5c480349ba2 *R/align.R
 dbc2e2974969646eb077d14187cd9046 *R/gini.R
 15b8d027cd18508b8613c763759f1213 *R/ics.R
-5b1ed9365f4b133dd4756cae960f5bb4 *README.md
-59f5daaa37c39fc2bce705776e01bca6 *man/align.Rd
+fd1402607ca8e3d74c89ceef13f14ba9 *README.md
+95528b4024273dbd7374eeb82ab055f1 *man/align.Rd
 91834a0118626e5803d543f8783d2f8b *man/gini.Rd
 ed4830e6411de6b69e4516c4eb8dacb2 *man/ics.Rd
-da169f659c117d75dc7cb0fd3fd70815 *tests/unit_test.R
+fb4856e26767bd11e0fbf81a11b3ed55 *tests/unit_test.R
