@@ -56,12 +56,14 @@
 #' @references 
 #' Kuhn, H. W. (1955). The Hungarian method for the assignment problem. Naval Research Logistics (NRL), 2(1-2), 83-97.
 #' 
+#' Langendorf, R. E., & Goldberg, D. S. (2019). Aligning statistical dynamics captures biological network functioning. arXiv preprint arXiv:1912.12551.
+#' 
 #' C. Papadimitriou and K. Steiglitz (1982), Combinatorial Optimization: Algorithms and Complexity. Englewood Cliffs: Prentice Hall.
 #' 
 #' @examples
 #' # The two networks to be aligned
-#' net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)
-#' net_two <- matrix(runif(25,0,1), nrow=5, ncol=5)
+#' net_one <- matrix(stats::runif(25,0,1), nrow=5, ncol=5)
+#' net_two <- matrix(stats::runif(25,0,1), nrow=5, ncol=5)
 #' 
 #' align(net_one, net_two)
 #' align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
@@ -181,7 +183,7 @@ align <- function(network_1_input, network_2_input, base = 2, max_duration, char
 
       # Characterize the remaining time steps
       for (t in 2:length(kernel_sampling)) {
-        network_1_diffusion <- expm::"%^%"(network_1, kernel_sampling[t]) 
+        network_1_diffusion <- expm::`%^%`(network_1, kernel_sampling[t]) 
 
         # For those interested in speeding things up, the following commented-out line proved to be slower
         # network_1_diffusion <- abs(Re(eig$vectors %*% diag(eig$values ^ t) %*% inverse))
@@ -220,7 +222,7 @@ align <- function(network_1_input, network_2_input, base = 2, max_duration, char
       }
 
       for (t in 2:length(kernel_sampling)) {
-        network_2_diffusion <- expm::"%^%"(network_2, kernel_sampling[t])
+        network_2_diffusion <- expm::`%^%`(network_2, kernel_sampling[t])
         
         if (characterization == "entropy") {
           network_2_output[, t] <- c(vegan::diversity(network_2_diffusion[1:matrix_sizes[2], 1:matrix_sizes[2]]) / vegan::diversity(rep(1, matrix_sizes[2])), rep(0, max(matrix_sizes) - matrix_sizes[2]))

@@ -1,23 +1,34 @@
-# netcom
+# netcom <img src="man/figures/netcom_sticker.png" align="right" width="120" />
+
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](http://www.gnu.org/licenses/gpl-3.0)
 [![CRAN_Status_Badge](http://www.r-pkg.org/badges/version/netcom)](https://cran.r-project.org/package=netcom)
-[![Build Status](https://travis-ci.org/langendorfr/netcom.svg?branch=master)](https://travis-ci.org/langendorfr/netcom)
+[![metacran downloads](https://cranlogs.r-pkg.org/badges/grand-total/netcom)](https://cran.r-project.org/package=netcom)
 
-`netcom` is an R package to align two networks using the dynamics of diffusion originating from their respective nodes.
+`netcom` is an R package to infer system functioning by emprically comparing networks to each other. There are many uses of this general approach to understanding network data. The vignette covers several common kinds of inference. Once installed, this can be opened by running:
 
-Consider network alignment as trying to compare two hypothetical cities of houses connected by roads. The approach implemented here is to pairwise compare each house with those in the other city by creating a house-specific signature. This is accomplished by quantifying the predictability of the location of a person at various times after they left their house, assuming they move randomly. This predictability across all houses captures much of the way each city is organized and functions. This package can be used to align networks using this conceptual rationale, with nodes as houses, edges as roads, and random diffusion representing people leaving their houses and walking around the city to other houses. 
+```R
+vignette("tutorial", package = "netcom")
+```
 
-The mechanics of this, which are conceptually akin to flow algorithms and Laplacian dynamics, can be analytically expressed as a Markov chain raised to successive powers which are the durations of diffusion. The alignment algorithm implemented here uses a normalized entropy to compare the predictability of diffusion emanating from each node in each network at each time step. A distance matrix is created with the numerically integrated differences between every pair of nodes' entropy-over-time curves where rows are nodes in one network and columns are nodes in the other network. The Hungarian algorithm is then used to find the optimal way to pair each node in each network with at most one node in the other network. 
+You can learn more about comparative inference in the following:
 
+- Langendorf, R. E. & Burgess, M. G. (2020) Empirically classifying network mechanisms. arXiv preprint arXiv:2012.15863.
 
-## Installation
-1. Install the release version of `netcom` from CRAN. 
-	```R
-	install.packages("devtools").
-	```
+- Langendorf, R. E. (2020). Using Structural Comparisons to Measure the Behavior of Complex Systems. In Evaluating Climate Change Impacts (pp. 123-137). Chapman and Hall/CRC.
 
-2. Install the development version of `netcom` from GitHub using `devtools`.
-	```R
-	install.packages("devtools")
-	devtools::install_github("langendorfr/netcom")
-	```
+- Langendorf, R. E. & Goldberg, D. S. (2019) Aligning statistical dynamics captures biological network functioning. arXiv preprint arXiv:1912.12551.
+
+You can install the **netcom** package two main ways:
+
+1. A release version of the package can be installed from CRAN (the Comprehensive R Archive Network): https://cran.r-project.org/package=netcom.
+
+```R
+install.packages("netcom").
+```
+
+2. Alternatively, the (usually) more recent development version can be installed from GitHub: https://github.com/langendorfr/netcom. This can be accomplished with the **devtools** package. We recommend new users install the other version, from CRAN, which is has less functioning but has been more reliably tested.
+
+```R
+install.packages("devtools")
+devtools::install_github("langendorfr/netcom")
+```

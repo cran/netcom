@@ -4,8 +4,15 @@
 \alias{align}
 \title{Network Alignment}
 \usage{
-align(network_1_input, network_2_input, base = 2, max_duration,
-  characterization = "entropy", normalization = FALSE, unit_test = FALSE)
+align(
+  network_1_input,
+  network_2_input,
+  base = 2,
+  max_duration,
+  characterization = "entropy",
+  normalization = FALSE,
+  unit_test = FALSE
+)
 }
 \arguments{
 \item{network_1_input}{The first network being aligned, which must be in matrix form. If the two
@@ -65,8 +72,8 @@ Network alignment pairs nodes between two networks so as to maximize similaritie
 }
 \examples{
 # The two networks to be aligned
-net_one <- matrix(runif(25,0,1), nrow=5, ncol=5)
-net_two <- matrix(runif(25,0,1), nrow=5, ncol=5)
+net_one <- matrix(stats::runif(25,0,1), nrow=5, ncol=5)
+net_two <- matrix(stats::runif(25,0,1), nrow=5, ncol=5)
 
 align(net_one, net_two)
 align(net_one, net_two, base = 1, characterization = "gini", normalization = TRUE)
@@ -74,6 +81,8 @@ align(net_one, net_two, base = 1, characterization = "gini", normalization = TRU
 }
 \references{
 Kuhn, H. W. (1955). The Hungarian method for the assignment problem. Naval Research Logistics (NRL), 2(1-2), 83-97.
+
+Langendorf, R. E., & Goldberg, D. S. (2019). Aligning statistical dynamics captures biological network functioning. arXiv preprint arXiv:1912.12551.
 
 C. Papadimitriou and K. Steiglitz (1982), Combinatorial Optimization: Algorithms and Complexity. Englewood Cliffs: Prentice Hall.
 }

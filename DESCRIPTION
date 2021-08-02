@@ -1,24 +1,30 @@
 Package: netcom
 Type: Package
-Title: Dynamic Network Alignment
-Version: 1.0.4
-Date: 2017-07-10
-Description: Functions to take two networks stored as matrices and return a node-level injection between them (bijection if the input networks are of the same size). The alignment is made by comparing diffusion kernels originating from each node in one network to those originating from each node in the other network. This creates a cost matrix where rows are nodes from one network and columns are nodes from the other network. Optimal node pairings are then found using the Hungarian algorithm.
+Title: NETwork COMparison Inference
+Version: 2.1.5
+Date: 2021-7-28
+Description: Infer system functioning with empirical NETwork COMparisons.
 Authors@R: c(
     person("Ryan", "Langendorf", role = c("aut", "cre"), email = "ryan.langendorf@colorado.edu"),
-    person("Debra", "Goldberg", role = "ctb", email = "debra@colorado.edu")
+    person("Debra", "Goldberg", role = "ctb", email = "debra@colorado.edu"),
+    person("Matthew", "Burgess", role = "ctb", email = "Matthew.G.Burgess@colorado.edu")
     )
 URL: https://github.com/langendorfr/netcom
 Repository: CRAN
 License: GPL-3
 Encoding: UTF-8
 Depends: R (>= 3.1.0)
-Imports: clue, expm, igraph, Matrix, pdist, pracma, vegan
-LazyData: true
-RoxygenNote: 6.0.1
+Imports: stats, dplyr, tibble, clue, expm, igraph, Matrix, pdist,
+        pracma, vegan, magrittr, foreach, parallel, doParallel, optimx,
+        GenSA, rlang, ggfortify, ggplot2, ggraph, reshape2
+RoxygenNote: 7.1.1
+Suggests: rmarkdown, knitr, testthat (>= 3.0.0)
+VignetteBuilder: knitr
+Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2017-07-10 18:51:08 UTC; Ryan
+Packaged: 2021-08-02 16:21:56 UTC; ryan
 Author: Ryan Langendorf [aut, cre],
-  Debra Goldberg [ctb]
+  Debra Goldberg [ctb],
+  Matthew Burgess [ctb]
 Maintainer: Ryan Langendorf <ryan.langendorf@colorado.edu>
-Date/Publication: 2017-07-10 19:02:53 UTC
+Date/Publication: 2021-08-02 20:10:02 UTC
