@@ -3,7 +3,7 @@ knitr::opts_chunk$set(
 #   collapse = TRUE,
   comment = "#>"
 )
-options(digits = 2)
+old <- options(digits = 3)
 
 ## ----CRAN installation, eval = FALSE------------------------------------------
 #  install.packages("netcom")
@@ -131,4 +131,7 @@ netcom::classify(
     directed = TRUE,
     mechanism_kind = "grow"
 )
+
+## ---- include = FALSE---------------------------------------------------------
+options(old)
 
