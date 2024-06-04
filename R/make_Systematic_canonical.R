@@ -3,47 +3,47 @@
 #' @description Creates a list of networks that systematically spans mechanisms and their respective parameters.
 #'
 #' @param net_size Number of nodes in the network.
-#' 
+#'
 #' @param neighborhood The range of nodes that form connected communities. Note: This implementation results in overlap of communities.
-#' 
+#'
 #' @param directed Whether the target network is directed. Defaults to TRUE.
-#' 
+#'
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
-#' 
+#'
 #' @param resolution The first step is to find the version of each process most similar to the target network. This parameter sets the number of parameter values to search across. Decrease to improve performance, but at the cost of accuracy. Defaults to 100.
-#' 
+#'
 #' @param resolution_min = The minimum parameter value to consider. Zero is not used because in many processes it results in degenerate systems (e.g. entirely unconnected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.01.
-#' 
+#'
 #' @param resolution_max The maximum parameter value to consider. One is not used because in many processes it results in degenerate systems (e.g. entirely connected networks). Currently process agnostic. Future versions will accept a vector of values, one for each process. Defaults to 0.99.
-#' 
+#'
 #' @param reps Defaults to 3. The number of networks to simulate for each parameter. More replicates increases accuracy by making the estimation of the parameter that produces networks most similar to the target network less idiosyncratic.
-#' 
+#'
 #' @param processes Defaults to c("ER", "PA", "DD", "SW", "NM"). Vector of process abbreviations. Currently only the default five are supported. Future versions will accept user-defined network-generating functions and associated parameters. ER = Erdos-Renyi random. PA = Preferential Attachment. DD = Duplication and Divergence. SW = Small World. NM = Niche Model.
-#' 
+#'
 #' @param power_max = Defaults to 5. The maximum power of attachment in the Preferential Attachment process (PA).
-#' 
+#'
 #' @param connectance_max = Defaults to 0.5. The maximum connectance parameter for the Niche Model.
-#' 
+#'
 #' @param divergence_max = Defaults to 0.5. The maximum divergence parameter for the Duplication and Divergence/Mutation mechanisms.
-#' 
+#'
 #' @param mutation_max = Defaults to 0.5. The maximum mutation parameter for the Duplication and Mutation mechanism.
-#' 
+#'
 #' @param cores = Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
-#' 
+#'
 #' @param verbose = Defaults to TRUE. Whether to print all messages.
 #'
 #' @details Produces ground-truthing network data.
 #'
 #' @return A list. The first element contains the networks. The second contains their corresponding parameters.
-#' 
+#'
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
-#' 
+#'
 #' @examples
 #' # Import netcom
 #' library(netcom)
-#' 
+#'
 #' make_Systematic(net_size = 10)
-#' 
+#'
 #' @export
 
 make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, net_kind = "matrix", resolution = 100, resolution_min = 0.01, resolution_max = 0.99, reps = 3, processes = c("ER", "PA", "DM", "SW", "NM"), power_max = 5, connectance_max = 0.5, divergence_max = 0.5, mutation_max = 0.5, cores = 1, verbose = TRUE) {
@@ -79,15 +79,15 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
 
                 if (processes[p] == "ER") {
                     p_ER <- master_par_systematic[i]
-                    net <- igraph::sample_gnp(n = net_size, 
-                                            p = p_ER, 
-                                            directed = directed, 
+                    net <- igraph::sample_gnp(n = net_size,
+                                            p = p_ER,
+                                            directed = directed,
                                             loops = FALSE)
 
                     if (net_kind == "matrix") {
-                        mat <- igraph::as_adj(net, 
-                                            type = "both", 
-                                            edges = TRUE, 
+                        mat <- igraph::as_adj(net,
+                                            type = "both",
+                                            # edges = TRUE,
                                             names = TRUE,
                                             sparse = FALSE)
                         ## igraph puts the edge id in the matrix element
@@ -107,21 +107,21 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
 
                 } else if (processes[p] == "PA") {
                     power_PA <- power_max * master_par_systematic[i]
-                    net <- igraph::sample_pa(n = net_size, 
+                    net <- igraph::sample_pa(n = net_size,
                                             power = power_PA,
                                             directed = directed,
-                                            m = 1, #NULL, 
-                                            out.dist = NULL, 
-                                            out.seq = NULL, 
-                                            out.pref = FALSE, 
+                                            m = 1, #NULL,
+                                            out.dist = NULL,
+                                            out.seq = NULL,
+                                            out.pref = FALSE,
                                             zero.appeal = 1,
                                             algorithm = "psumtree",
                                             start.graph = NULL)
 
                     if (net_kind == "matrix") {
-                        mat <- igraph::as_adj(net, 
-                                            type = "both", 
-                                            edges = TRUE, 
+                        mat <- igraph::as_adj(net,
+                                            type = "both",
+                                            # edges = TRUE,
                                             names = TRUE,
                                             sparse = FALSE)
                         ## igraph puts the edge id in the matrix element
@@ -142,11 +142,11 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
                 } else if (processes[p] == "DD") {
                     divergence_DD <- divergence_max * master_par_systematic[i]
 
-                    net <- make_DD(size = net_size, 
-                                   net_kind = net_kind, 
-                                   divergence = divergence_DD, 
+                    net <- make_DD(size = net_size,
+                                   net_kind = net_kind,
+                                   divergence = divergence_DD,
                                    directed = directed) #FALSE)
- 
+
                     networks[[counter]] = net
 
                     parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "divergence_DD", Parameter_Value = divergence_DD)
@@ -156,8 +156,8 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
                     divergence_DM <- divergence_max * master_par_systematic[i]
                     mutation_DM <- mutation_max * master_par_systematic[i]
 
-                    net <- make_DM(size = net_size, 
-                                    net_kind = net_kind, 
+                    net <- make_DM(size = net_size,
+                                    net_kind = net_kind,
                                     divergence = divergence_DM,
                                     mutation = mutation_DM, #0, #0.01,
                                     directed = directed) #FALSE)
@@ -176,10 +176,10 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
                         neighborhood = max(1, round(0.1 * net_size))
                     }
 
-                    net <- make_SW(size = net_size, 
-                                   net_kind = net_kind, 
-                                   rewire = rewire_SW, 
-                                   neighborhood = neighborhood, 
+                    net <- make_SW(size = net_size,
+                                   net_kind = net_kind,
+                                   rewire = rewire_SW,
+                                   neighborhood = neighborhood,
                                    directed = directed) #FALSE)
 
                     networks[[counter]] <- net
@@ -192,15 +192,15 @@ make_Systematic_canonical <- function(net_size, neighborhood, directed = TRUE, n
                     niches <- stats::runif(net_size) # %>% sort()
                     net <- make_NM(size = net_size,
                                    net_kind = net_kind,
-                                   niches = niches, 
-                                   connectance = connectance_NM, 
+                                   niches = niches,
+                                   connectance = connectance_NM,
                                    directed = directed, #TRUE
                                    grow = TRUE)
                     networks[[counter]] <- net
 
                     parameters_addition <- tibble::tibble(Process = processes[p], Parameter_Name = "connectance_NM", Parameter_Value = connectance_NM)
                     parameters = dplyr::bind_rows(parameters, parameters_addition)
-                    
+
                 } else {
                     stop("An unknown process was included in the simulation.")
                 }

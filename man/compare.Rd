@@ -64,9 +64,9 @@ networks <- list()
 for (net in 1:comparisons) {
      networks[[net]] = matrix(
          sample(
-             c(0,1), 
-             size = size^2, 
-             replace = TRUE), 
+             c(0,1),
+             size = size^2,
+             replace = TRUE),
          nrow = size,
          ncol = size)
 }

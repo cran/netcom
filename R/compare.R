@@ -1,41 +1,41 @@
 #' @title Compare Networks Many-to-Many
 #'
 #' @description Compares one network to a list of many networks.
-#' 
+#'
 #' @param networks The networks being compared to the target network
-#' 
+#'
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
-#' 
+#'
 #' @param method This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods. Defaults to "DD".
-#' 
+#'
 #' @param cause_orientation = The orientation of directed adjacency matrices. Defaults to "row".
-#' 
+#'
 #' @param DD_kind = A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.
-#' 
+#'
 #' @param DD_weight = Weights of each network property in DD_kind. Defaults to 1, which is equal weighting for each property.
-#' 
+#'
 #' @param max_norm Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.
-#' 
+#'
 #' @param size_different Defaults to FALSE. If TRUE, will ensure the node-level properties being compared are vectors of the same length, which is accomplished using splines.
 #'
 #' @param cores Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
-#' 
+#'
 #' @param diffusion_sampling Base of the power to use to nonlinearly sample the diffusion kernels if method = "align". Defaults to 2.
-#' 
+#'
 #' @param diffusion_limit Number of markov steps in the diffusion kernels if method = "align". Defaults to 10.
-#' 
+#'
 #' @param verbose Defaults to TRUE. Whether to print all messages.
-#' 
+#'
 #' @details Note: Currently each process is assumed to have a single governing parameter.
 #'
 #' @return A square matrix with dimensions equal to the number of networks being compared, where the ij element is the comparison of networks i and j.
-#' 
+#'
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
-#' 
+#'
 #' @examples
 #' # Import netcom
 #' library(netcom)
-#' 
+#'
 #' # Adjacency matrix
 #' size <- 10
 #' comparisons <- 50
@@ -43,18 +43,18 @@
 #' for (net in 1:comparisons) {
 #'      networks[[net]] = matrix(
 #'          sample(
-#'              c(0,1), 
-#'              size = size^2, 
-#'              replace = TRUE), 
+#'              c(0,1),
+#'              size = size^2,
+#'              replace = TRUE),
 #'          nrow = size,
 #'          ncol = size)
 #' }
 #' compare(networks = networks)
-#' 
+#'
 #' @export
-#' 
+#'
 #' @importFrom parallel makeCluster
-#' 
+#'
 #' @importFrom doParallel registerDoParallel
 
 compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientation = "row", DD_kind = "all", DD_weight = 1, max_norm = FALSE, size_different = FALSE, cores = 1, diffusion_sampling = 2, diffusion_limit = 10, verbose = FALSE) {
@@ -67,8 +67,8 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
     if (method == "align") {
         ## Pairwise compare input network with each network in state_space
         if (cores == 1) {
-            D_netcom <- matrix(NA, 
-                        nrow = length(networks), 
+            D_netcom <- matrix(NA,
+                        nrow = length(networks),
                         ncol = length(networks))
             for (net_1 in seq_along(networks)) {
                 for (net_2 in seq_along(networks)) {
@@ -76,11 +76,11 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                         # if (verbose == TRUE) { print(c(net_1, net_2)) }
 
                         alignment <- align(
-                            networks[[net_1]], 
-                            networks[[net_2]], 
+                            networks[[net_1]],
+                            networks[[net_2]],
                             base = diffusion_sampling,
                             max_duration = diffusion_limit,
-                            characterization = "entropy", 
+                            characterization = "entropy",
                             normalization = FALSE
                         )
 
@@ -104,17 +104,17 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                 j_output <- rep(NA, length(networks))
                 for (net_2 in 1:length(networks)) {
                     #  if (verbose == TRUE) { print(c(net_1, net_2)) }
-                
+
                     j_output[net_2] <- align(
-                        networks[[net_1]], 
-                        networks[[net_2]], 
+                        networks[[net_1]],
+                        networks[[net_2]],
                         base = diffusion_sampling,
-                        max_duration = diffusion_limit, 
-                        characterization = "entropy", 
+                        max_duration = diffusion_limit,
+                        characterization = "entropy",
                         normalization = FALSE)$score
                 }
-                
-                return(j_output) 
+
+                return(j_output)
             }
 
             parallel::stopCluster(cluster)
@@ -134,7 +134,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                 networks = lapply(networks, function(x){t(x)})
             }
 
-            D_DD <- matrix(NA, 
+            D_DD <- matrix(NA,
                         nrow = length(networks),
                         ncol = length(networks))
 
@@ -147,11 +147,11 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
 
                 ## Assume all networks are the same size
                 net_size <- nrow(networks[[net]])
-                
+
                 DD_combined <- list()
-            
+
                 igraph_graph <- igraph::graph_from_adjacency_matrix(networks[[net]], mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)
-                
+
                 equilibrium_net <- networks[[net]]
                 zero_rows <- which(rowSums(equilibrium_net) == 0)
                 diag(equilibrium_net)[zero_rows] = 1
@@ -173,27 +173,27 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                         DD_kind[DD_kind_name],
                         "out" = networks[[net]] %>% rowSums() %>% as.numeric(),
                         "eq_out" = equilibrium_net %>% rowSums() %>% as.numeric(),
-                        
+
                         "in" = networks[[net]] %>% colSums() %>% as.numeric(),
                         "eq_in" = equilibrium_net %>% colSums() %>% as.numeric(),
-                        
+
                         "undirected" = as.numeric(rowSums(networks[[net]])) + as.numeric(colSums(networks[[net]])),
                         "eq_undirected" = as.numeric(rowSums(equilibrium_net)) + as.numeric(colSums(equilibrium_net)),
-                        
+
                         "all" = 0.5 * (rbind( rowSums(networks[[net]]) + colSums(networks[[net]]) )),
                         "eq_all" = 0.5 * (rbind( rowSums(equilibrium_net) + colSums(equilibrium_net) )),
-                        
+
                         "entropy_out" = networks[[net]] %>% t() %>% vegan::diversity() %>% as.numeric(),
                         "eq_entropy_out" = equilibrium_net %>% t() %>% vegan::diversity() %>% as.numeric(),
-                        
+
                         "entropy_in" = networks[[net]] %>% vegan::diversity() %>% as.numeric(),
                         "eq_entropy_in" = equilibrium_net %>% vegan::diversity() %>% as.numeric(),
-                        
+
                         "entropy_all" = c(networks[[net]] %>% t() %>% vegan::diversity() %>% as.numeric(), networks[[net]] %>% vegan::diversity() %>% as.numeric()),
                         "eq_entropy_all" = c(equilibrium_net %>% t() %>% vegan::diversity() %>% as.numeric(), equilibrium_net %>% vegan::diversity() %>% as.numeric()),
-                        
-                        "clustering_coefficient" = igraph::transitivity(igraph_graph, type = "weighted"),
-                        "eq_clustering_coefficient" = igraph::transitivity(eq_igraph_graph, type = "weighted"),
+
+                        "clustering_coefficient" = igraph::transitivity(igraph::as.undirected(igraph_graph, mode = "collapse"), type = "weighted"),
+                        "eq_clustering_coefficient" = igraph::transitivity(igraph::as.undirected(eq_igraph_graph, mode = "collapse"), type = "weighted"),
 
                         "cohesion" = igraph::vertex_connectivity(igraph_graph),
                         "eq_cohesion" = igraph::vertex_connectivity(eq_igraph_graph),
@@ -239,7 +239,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                     DD_combined[[DD_kind_name]] = DD_net
 
                 }
-                
+
                 net_DD_list[[net]] = DD_combined
             }
 
@@ -308,7 +308,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
 
         } else if (net_kind == "list") {
 
-            D_DD <- matrix(NA, 
+            D_DD <- matrix(NA,
                         nrow = length(networks),
                         ncol = length(networks))
 
@@ -374,7 +374,7 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
                                                 DD_vector = c(DD_vector, DD_node_out, DD_node_in)
                                             }
                                             DD_vector
-                                        },                                        
+                                        },
                                 stop("Kind of Degree Distribution not supported. Check the DD_kind parameter.")
                             )
 
@@ -489,17 +489,17 @@ compare <- function(networks, net_kind = "matrix", method = "DD", cause_orientat
             return_matrix <- D_DD
 
 
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
+
+
+
+
+
+
+
+
+
+
         } else {
             stop("Unknown network kind. Must be `list` or `matrix`.")
         }

@@ -3,37 +3,37 @@
 #' @description Compares one network to a list of many networks.
 #'
 #' @param target The network be compared.
-#' 
+#'
 #' @param networks The networks being compared to the target network
-#' 
+#'
 #' @param net_size Size
-#' 
+#'
 #' @param net_kind If the network is an adjacency matrix ("matrix") or an edge list ("list"). Defaults to "matrix".
-#' 
+#'
 #' @param method This determines the method used to compare networks at the heart of the classification. Currently "DD" (Degree Distribution) and "align" (the align function which compares networks by the entropy of diffusion on them) are supported. Future versions will allow user-defined methods. Defaults to "DD".
-#' 
+#'
 #' @param cause_orientation = The orientation of directed adjacency matrices. Defaults to "row".
-#' 
+#'
 #' @param DD_kind = A vector of network properties to be used to compare networks. Defaults to "all", which is the average of the in- and out-degrees.
-#' 
+#'
 #' @param DD_weight = Weights of each network property in DD_kind. Defaults to 1, which is equal weighting for each property.
-#' 
+#'
 #' @param max_norm Binary variable indicating if each network property should be normalized so its max value (if a node-level property) is one. Defaults to FALSE.
 #'
 #' @param cores Defaults to 1. The number of cores to run the classification on. When set to 1 parallelization will be ignored.
-#' 
+#'
 #' @param verbose Defaults to TRUE. Whether to print all messages.
-#' 
+#'
 #' @details Note: Currently each process is assumed to have a single governing parameter.
 #'
 #' @return A pseudo-distance vector where the i-element is the comparison between the target network and the ith network being compared to.
-#' 
+#'
 #' @references Langendorf, R. E., & Burgess, M. G. (2020). Empirically Classifying Network Mechanisms. arXiv preprint arXiv:2012.15863.
-#' 
+#'
 #' @examples
 #' # Import netcom
 #' library(netcom)
-#' 
+#'
 #' # Adjacency matrix
 #' size <- 10
 #' comparisons <- 50
@@ -49,7 +49,7 @@
 #'          ncol = size)
 #' }
 #' compare_Target(target = network_target, networks = network_others, net_size = size, method = "DD")
-#' 
+#'
 #' @export
 
 compare_Target <- function(target, networks, net_size, net_kind = "matrix", method = "DD", cause_orientation = "row", DD_kind = "all", DD_weight = 1, max_norm = FALSE, cores = 1, verbose = FALSE) {
@@ -103,7 +103,7 @@ compare_Target <- function(target, networks, net_size, net_kind = "matrix", meth
                                         base = 2,
                                         characterization = "entropy",
                                         normalization = FALSE)$score
-                return(output) 
+                return(output)
             }
 
             ## Stop backend
@@ -151,27 +151,27 @@ compare_Target <- function(target, networks, net_size, net_kind = "matrix", meth
 
                     "out" = target %>% rowSums() %>% as.numeric(),
                     "eq_out" = equilibrium_net %>% rowSums() %>% as.numeric(),
-                    
+
                     "in" = target %>% colSums() %>% as.numeric(),
                     "eq_in" = equilibrium_net %>% colSums() %>% as.numeric(),
-                    
+
                     "undirected" = as.numeric(rowSums(target)) + as.numeric(colSums(target)),
                     "eq_undirected" = as.numeric(rowSums(equilibrium_net)) + as.numeric(colSums(equilibrium_net)),
-                    
+
                     "all" = 0.5 * (rbind( rowSums(target) + colSums(target) )),
                     "eq_all" = 0.5 * (rbind( rowSums(equilibrium_net) + colSums(equilibrium_net) )),
-                    
+
                     "entropy_out" = target %>% t() %>% vegan::diversity() %>% as.numeric(),
                     "eq_entropy_out" = equilibrium_net %>% t() %>% vegan::diversity() %>% as.numeric(),
-                    
+
                     "entropy_in" = target %>% vegan::diversity() %>% as.numeric(),
                     "eq_entropy_in" = equilibrium_net %>% vegan::diversity() %>% as.numeric(),
-                    
+
                     "entropy_all" = c(target %>% t() %>% vegan::diversity() %>% as.numeric(), target %>% vegan::diversity() %>% as.numeric()),
                     "eq_entropy_all" = c(equilibrium_net %>% t() %>% vegan::diversity() %>% as.numeric(), equilibrium_net %>% vegan::diversity() %>% as.numeric()),
-                    
-                    "clustering_coefficient" = igraph::transitivity(igraph_graph, type = "weighted"),
-                    "eq_clustering_coefficient" = igraph::transitivity(eq_igraph_graph, type = "weighted"),
+
+                    "clustering_coefficient" = igraph::transitivity(igraph::as.undirected(igraph_graph, mode = "collapse"), type = "weighted"),
+                    "eq_clustering_coefficient" = igraph::transitivity(igraph::as.undirected(eq_igraph_graph, mode = "collapse"), type = "weighted"),
 
                     "cohesion" = igraph::vertex_connectivity(igraph_graph),
                     "eq_cohesion" = igraph::vertex_connectivity(eq_igraph_graph),
@@ -224,11 +224,11 @@ compare_Target <- function(target, networks, net_size, net_kind = "matrix", meth
             D_DD <- rep(NA, times = length(networks))
             for (net in seq_along(networks)) {
                 # if (verbose) { print(net) }
-                
+
                 DD_combined <- list()
-                
+
                 igraph_graph <- igraph::graph_from_adjacency_matrix(networks[[net]], mode = "directed", weighted = TRUE, diag = TRUE, add.colnames = NULL, add.rownames = NA)
-                
+
                 equilibrium_net <- networks[[net]]
                 zero_rows <- which(rowSums(equilibrium_net) == 0)
                 diag(equilibrium_net)[zero_rows] = 1
@@ -248,30 +248,30 @@ compare_Target <- function(target, networks, net_size, net_kind = "matrix", meth
                 for (DD_kind_name in seq_along(DD_kind)) {
                     DD <- switch(
                         DD_kind[DD_kind_name],
- 
+
                         "out" = networks[[net]] %>% rowSums() %>% as.numeric(),
                         "eq_out" = equilibrium_net %>% rowSums() %>% as.numeric(),
-                        
+
                         "in" = networks[[net]] %>% colSums() %>% as.numeric(),
                         "eq_in" = equilibrium_net %>% colSums() %>% as.numeric(),
-                        
+
                         "undirected" = as.numeric(rowSums(networks[[net]])) + as.numeric(colSums(networks[[net]])),
                         "eq_undirected" = as.numeric(rowSums(equilibrium_net)) + as.numeric(colSums(equilibrium_net)),
-                        
+
                         "all" = 0.5 * (rbind( rowSums(networks[[net]]) + colSums(networks[[net]]) )),
                         "eq_all" = 0.5 * (rbind( rowSums(equilibrium_net) + colSums(equilibrium_net) )),
-                        
+
                         "entropy_out" = networks[[net]] %>% t() %>% vegan::diversity() %>% as.numeric(),
                         "eq_entropy_out" = equilibrium_net %>% t() %>% vegan::diversity() %>% as.numeric(),
-                        
+
                         "entropy_in" = networks[[net]] %>% vegan::diversity() %>% as.numeric(),
                         "eq_entropy_in" = equilibrium_net %>% vegan::diversity() %>% as.numeric(),
-                        
+
                         "entropy_all" = c(networks[[net]] %>% t() %>% vegan::diversity() %>% as.numeric(), networks[[net]] %>% vegan::diversity() %>% as.numeric()),
                         "eq_entropy_all" = c(equilibrium_net %>% t() %>% vegan::diversity() %>% as.numeric(), equilibrium_net %>% vegan::diversity() %>% as.numeric()),
-                        
-                        "clustering_coefficient" = igraph::transitivity(igraph_graph, type = "weighted"),
-                        "eq_clustering_coefficient" = igraph::transitivity(eq_igraph_graph, type = "weighted"),
+
+                        "clustering_coefficient" = igraph::transitivity(igraph::as.undirected(igraph_graph, mode = "collapse"), type = "weighted"),
+                        "eq_clustering_coefficient" = igraph::transitivity(igraph::as.undirected(eq_igraph_graph, mode = "collapse"), type = "weighted"),
 
                         "cohesion" = igraph::vertex_connectivity(igraph_graph),
                         "eq_cohesion" = igraph::vertex_connectivity(eq_igraph_graph),
@@ -281,7 +281,7 @@ compare_Target <- function(target, networks, net_size, net_kind = "matrix", meth
 
                         "alpha" = igraph::alpha_centrality(igraph_graph, nodes = igraph::V(igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
                         "eq_alpha" = igraph::alpha_centrality(eq_igraph_graph, nodes = igraph::V(eq_igraph_graph), alpha = 10, loops = TRUE, exo = 1, weights = NULL, tol = 1e-07, sparse = FALSE),
-                        
+
                         "page_rank" = igraph::page_rank(igraph_graph, algo = "prpack", vids = igraph::V(igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
                         "eq_page_rank" = igraph::page_rank(eq_igraph_graph, algo = "prpack", vids = igraph::V(eq_igraph_graph), directed = TRUE, damping = 0.85, personalized = NULL, weights = NULL, options = NULL)$vector,
 
@@ -335,7 +335,7 @@ compare_Target <- function(target, networks, net_size, net_kind = "matrix", meth
                     DD_2 <- DD_combined[[DD_kind_name]]
 
                     DD_1_vs_2 <- ((DD_1 - DD_2)^2) #%>% sum() %>% sqrt()
-                    
+
                     if (max(DD_1_vs_2, na.rm = TRUE) != 0) {
                         DD_1_vs_2 = (sum(DD_1_vs_2) / max(DD_1_vs_2, na.rm = TRUE)) * DD_weight[DD_kind_name]
                     } else {
